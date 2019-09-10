@@ -867,13 +867,14 @@ function DialogDraw() {
 	
 	// If we must show the item/inventory menu
 	if (((Player.FocusGroup != null) || ((CurrentCharacter.FocusGroup != null) && CurrentCharacter.AllowItem)) && (DialogIntro() != "")) {
-		
+
 		// The view can show one specific extended item or the list of all items for a group
-		if (DialogFocusItem != null)
+		if (DialogFocusItem != null) {
 			CommonDynamicFunction("Inventory" + DialogFocusItem.Asset.Group.Name + DialogFocusItem.Asset.Name + "Draw()");
-		else
+			DrawButton(1885, 25, 90, 90, "", "White", "Icons/Exit.png");
+		} else {
 			DialogDrawItemMenu((Player.FocusGroup != null) ? Player : CurrentCharacter);
-		
+		}
 	} else {
 
 		// Draws the intro text or dialog result

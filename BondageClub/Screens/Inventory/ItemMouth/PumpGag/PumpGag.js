@@ -14,7 +14,6 @@ function InventoryItemMouthPumpGagDraw() {
 	DrawText(DialogFind(Player, "PumpLevel" + DialogFocusItem.Property.PumpLevel.toString()), 1500, 600, "White", "Gray");
 	if (DialogFocusItem.Property.PumpLevel > 0) DrawButton(1200, 700, 250, 65, DialogFind(Player, "DeflateIt"), "White");
 	if (DialogFocusItem.Property.PumpLevel < 4) DrawButton(1550, 700, 250, 65, DialogFind(Player, "PumpIt"), "White");
-	DrawButton(1885, 25, 90, 90, "", "White", "Icons/Exit.png");
 }
 
 // Catches the item extension clicks
