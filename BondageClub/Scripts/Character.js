@@ -12,6 +12,8 @@ function CharacterReset(CharacterID, CharacterAssetFamily) {
 		AccountName: "",
 		Owner: "",
 		Lover: "",
+		Tags: "",
+		Description: "",
 		Money: 0,
 		Inventory: [],		
 		Appearance: [],
@@ -207,6 +209,8 @@ function CharacterOnlineRefresh(Char, data, SourceMemberNumber) {
 	Char.Creation = data.Creation;
 	Char.ItemPermission = data.ItemPermission;
 	Char.Ownership = data.Ownership;	
+	Char.Tags = data.Tags;	
+	Char.Description = data.Description;	
 	Char.Reputation = (data.Reputation != null) ? data.Reputation : [];
 	Char.Appearance = ServerAppearanceLoadFromBundle(Char, "Female3DCG", data.Appearance, SourceMemberNumber);
 	if (Char.ID != 0) InventoryLoad(Char, data.Inventory);
@@ -235,7 +239,9 @@ function CharacterLoadOnline(data, SourceMemberNumber) {
 		Char = Character[Character.length - 1];
 		Char.Name = data.Name;
 		Char.Lover = (data.Lover != null) ? data.Lover : "";
-		Char.Owner = (data.Owner != null) ? data.Owner : "";
+		Char.Owner = (data.Owner != null) ? data.Owner : "";				
+		Char.Tags = (data.Tags != null) ? data.Tags : "";
+		Char.Description = (data.Description != null) ? data.Description : "";
 		Char.AccountName = "Online-" + data.ID.toString();
 		Char.MemberNumber = data.MemberNumber;
 		var BackupCurrentScreen = CurrentScreen;
@@ -275,6 +281,8 @@ function CharacterLoadOnline(data, SourceMemberNumber) {
 
 		// Flags "refresh" if the ownership or inventory has changed
 		if (!Refresh && (JSON.stringify(Char.Ownership) !== JSON.stringify(data.Ownership))) Refresh = true;
+		if (!Refresh && (Char.Tags != data.Tags)) Refresh = true;
+		if (!Refresh && (Char.Description != data.Description)) Refresh = true;
 		if (!Refresh && (data.Inventory != null) && (Char.Inventory.length != data.Inventory.length)) Refresh = true;
 
 		// If we must refresh

@@ -4,6 +4,19 @@ var InformationSheetSelection = null;
 var InformationSheetPreviousModule = "";
 var InformationSheetPreviousScreen = "";
 
+function InformationSheetLoad() {
+	var C = InformationSheetSelection;
+	// Tags and Description
+	if (C.ID == 0) {
+		ElementCreateInput("TagsInput", "text");
+		ElementValue("TagsInput", C.Tags);
+
+		//TODO make multiline textbox
+		ElementCreateInput("DescriptionInput", "text");
+		ElementValue("DescriptionInput", C.Description);		
+	}
+}
+
 // Gets the best title for the player and returns it
 function InformationSheetGetTitle() {
 	if (LogQuery("ClubMistress", "Management")) return TextGet("TitleMistress");
@@ -64,6 +77,23 @@ function InformationSheetRun() {
 	} else {
 		DrawText(TextGet("Owner") + " " + C.Ownership.Name + " (" + C.Ownership.MemberNumber + ")", 550, 575, "Black", "Gray");
 		DrawText(TextGet((C.Ownership.Stage == 0) ? "TrialFor" : "CollaredFor") + " " + (Math.floor((CurrentTime - C.Ownership.Start) / 86400000)).toString() + " " + TextGet("Days"), 550, 650, "Black", "Gray");
+	}
+
+	// Tags and Description
+	if (C.ID == 0) {
+		// Viewing the Player
+		
+		DrawText("Tags: ", 550, 725, "Black", "Gray");
+		ElementPosition("TagsInput", 1100, 725, 900);
+
+		DrawText("Description: ", 550, 800, "Black", "Gray");
+		ElementPosition("DescriptionInput", 1075, 850, 1000);
+	} else {
+		// Viewing other player
+
+		DrawText("Tags: " + C.Tags, 550, 725, "Black", "Gray");
+		DrawText("Description: ", 550, 800, "Black", "Gray");
+		DrawText(C.Description, 550, 850, "Black", "Gray");
 	}
 
 	// For player and online characters, we show the reputation and skills
@@ -131,7 +161,39 @@ function InformationSheetClick() {
 
 // when the user exit this screen
 function InformationSheetExit() {
+	InformationSheetSave();
 	CommonSetScreen(InformationSheetPreviousModule, InformationSheetPreviousScreen);
+}
+
+function InformationSheetSave() {
+	var C = InformationSheetSelection;
+
+	// Char is not player
+	if (C.ID == 0) {
+		var isChanged = false;
+	
+		var tags = ElementValue("TagsInput").trim();
+		if (C.Tags != tags) {
+			C.Tags = tags;
+			isChanged = true;
+		}
+		var desc = ElementValue("DescriptionInput").trim();
+		if (C.Description != desc) {
+			C.Description = desc;
+			isChanged = true;
+		}	
+	
+		if (isChanged) {
+			ServerSend("AccountUpdate", 
+			{
+				Tags: C.Tags,
+				Description: C.Description
+			});
+		}
+	}
+
+	ElementRemove("TagsInput");
+	ElementRemove("DescriptionInput");
 }
 
 // Loads the information sheet for a character

@@ -159,6 +159,9 @@ function LoginResponse(C) {
 			if ((Player.Ownership != null) && (Player.Ownership.Name != null))
 				Player.Owner = (Player.Ownership.Stage == 1) ? Player.Ownership.Name : "";
 
+			Player.Tags = C.Tags;
+			Player.Description = C.Description;
+
 			// Gets the online preferences
 			Player.LabelColor = C.LabelColor;
 			Player.ItemPermission = C.ItemPermission;
