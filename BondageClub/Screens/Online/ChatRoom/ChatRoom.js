@@ -340,6 +340,13 @@ function ChatRoomCharacterUpdate(C) {
 		ActivePose: C.ActivePose,
 		Appearance: ServerAppearanceBundle(C.Appearance)
 	};
+
+	if (C.ID == 0) {
+		// Add tags and desc if we update players character
+		data.Tags = C.Tags;
+		data.Description = C.Description;
+	}
+
 	ServerSend("ChatRoomCharacterUpdate", data);
 }
 

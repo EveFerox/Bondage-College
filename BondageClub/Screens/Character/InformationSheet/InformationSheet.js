@@ -81,7 +81,7 @@ function InformationSheetRun() {
 
 	// Tags and Description
 	if (C.ID == 0) {
-		// Viewing the Player
+		// Viewing the player, can edit
 		
 		DrawText("Tags: ", 550, 725, "Black", "Gray");
 		ElementPosition("TagsInput", 1100, 725, 900);
@@ -100,7 +100,7 @@ function InformationSheetRun() {
 	if ((C.ID == 0) || (C.AccountName.indexOf("Online-") >= 0)) {
 
 		// Shows the member number and online permissions for other players
-		if (C.ID != 0) DrawText(TextGet("ItemPermission") + " " + TextGet("PermissionLevel" + C.ItemPermission.toString()), 550, 850, "Black", "Gray");
+		if (C.ID != 0) DrawText(TextGet("ItemPermission") + " " + TextGet("PermissionLevel" + C.ItemPermission.toString()), 550, 900, "Black", "Gray");
 
 		// Draw the reputation section
 		DrawText(TextGet("Reputation"), 1000, 125, "Black", "Gray");
@@ -149,20 +149,23 @@ function InformationSheetRun() {
 	DrawButton(1815, 75, 90, 90, "", "White", "Icons/Exit.png");
 	if (C.ID == 0) DrawButton(1815, 190, 90, 90, "", "White", "Icons/Preference.png");
 	if (C.ID == 0) DrawButton(1815, 305, 90, 90, "", "White", "Icons/FriendList.png");
-
 }
 
 // When the user clicks on the character info screen
 function InformationSheetClick() {
 	if ((MouseX >= 1815) && (MouseX < 1905) && (MouseY >= 75) && (MouseY < 165)) InformationSheetExit();
-	if ((MouseX >= 1815) && (MouseX < 1905) && (MouseY >= 190) && (MouseY < 280) && (InformationSheetSelection.ID == 0)) CommonSetScreen("Character", "Preference");
-	if ((MouseX >= 1815) && (MouseX < 1905) && (MouseY >= 305) && (MouseY < 395) && (InformationSheetSelection.ID == 0)) CommonSetScreen("Character", "FriendList");
+	if ((MouseX >= 1815) && (MouseX < 1905) && (MouseY >= 190) && (MouseY < 280) && (InformationSheetSelection.ID == 0)) InformationSheetChangeScreen("Character", "Preference");
+	if ((MouseX >= 1815) && (MouseX < 1905) && (MouseY >= 305) && (MouseY < 395) && (InformationSheetSelection.ID == 0)) InformationSheetChangeScreen("Character", "FriendList");
 }
 
 // when the user exit this screen
 function InformationSheetExit() {
+	InformationSheetChangeScreen(InformationSheetPreviousModule, InformationSheetPreviousScreen);
+}
+
+function InformationSheetChangeScreen(Module, Screen) {
 	InformationSheetSave();
-	CommonSetScreen(InformationSheetPreviousModule, InformationSheetPreviousScreen);
+	CommonSetScreen(Module, Screen);
 }
 
 function InformationSheetSave() {
@@ -183,7 +186,8 @@ function InformationSheetSave() {
 			isChanged = true;
 		}	
 	
-		if (isChanged) {
+		if (isChanged) {			
+			ChatRoomCharacterUpdate(C);
 			ServerSend("AccountUpdate", 
 			{
 				Tags: C.Tags,
