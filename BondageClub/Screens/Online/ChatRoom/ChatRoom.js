@@ -27,6 +27,7 @@ function ChatRoomCanServeDrink() { return ((CurrentCharacter != null) && Current
 function ChatRoomCanGiveMoneyForOwner() { return ((ChatRoomMoneyForOwner > 0) && (CurrentCharacter != null) && (Player.Ownership != null) && (Player.Ownership.Stage == 1) && (Player.Ownership.MemberNumber == CurrentCharacter.MemberNumber)) }
 function ChatRoomPlayerIsAdmin() { return ((ChatRoomData.Admin != null) && (ChatRoomData.Admin.indexOf(Player.MemberNumber) >= 0)) }
 function ChatRoomCurrentCharacterIsAdmin() { return ((CurrentCharacter != null) && (ChatRoomData.Admin != null) && (ChatRoomData.Admin.indexOf(CurrentCharacter.MemberNumber) >= 0)) }
+function ChatRoomLoverOptionCanAdd() { return !Player.HasLover(); }
 
 // Creates the chat room input elements
 function ChatRoomCreateElement() {
@@ -611,4 +612,28 @@ function ChatRoomPayQuest(data) {
 		CharacterChangeMoney(Player, M);
 		ChatRoomQuestGiven.splice(ChatRoomQuestGiven.indexOf(data.Sender), 1);
 	}
+}
+
+//Sets CurrentCharacter as players lover
+function ChatRoomLoverAdd() {
+	var C = CurrentCharacter;
+	DialogLeave();
+
+	if (C == null) {
+		console.error("current char is null");
+		return;
+	}
+
+	if (Player.HasLover()) {
+		console.error("player already has a lover");
+		return;
+	}
+
+	Player.Lover = 
+	{
+		MemberNumber: C.MemberNumber,
+		Name: C.Name
+	};
+
+	//TODO push to server
 }

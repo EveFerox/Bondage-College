@@ -27,6 +27,7 @@ PlayerGagged,,,(You don't have access to use or remove items on her.),,!DialogDo
 10,0,(Accept her collar and begin the ceremony.),,"SendOwnershipRequest(""Accept"")","OwnershipOptionIs(""CanEndTrial"")"
 10,100,"(Rules, restrictions & punishments.)","(Select the rule, restriction or punishment that you want to enforce.)",,IsCollaredByPlayer()
 10,,(Give her the money envelope.),,GiveMoneyForOwner(),CanGiveMoneyForOwner()
+10,0,(Make her your lover.),(She is now your lover.),LoverAdd(),LoverOptionCanAdd()
 11,0,(Pay 100$ for the collaring ceremony.),"(You pay and prepare the ceremony.  A maid brings a slave collar, she must accept it to complete the collaring.)","SendOwnershipRequest(""Propose"")",DialogMoneyGreater(100)
 11,0,(Refuse to pay.),(Main menu.),,
 10,0,(Back to main menu.),(Main menu.),,
