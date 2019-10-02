@@ -38,9 +38,18 @@ function InformationSheetRun() {
 	} else {
 		if (C.Creation != null) DrawText(TextGet("MemberFor") + " " + (Math.floor((CurrentTime - C.Creation) / 86400000)).toString() + " " + TextGet("Days"), 550, 350, "Black", "Gray");
 	}
-	
-	// Shows the lover and owner
-	DrawText(TextGet("Lover") + " " + (((C.Lover == null) || (C.Lover == "")) ? TextGet("LoverNone") : C.Lover.replace("NPC-", "")), 550, 500, "Black", "Gray");	
+
+	// Shows the lover
+	var LoverText = " ";
+	if (C.HasLover()) {
+		LoverText += C.Lover.Name + " (" + C.Lover.MemberNumber + ")";
+	} else {
+		LoverText += TextGet("LoverNone");
+	}
+
+	DrawText(TextGet("Lover") + LoverText, 550, 500, "Black", "Gray");
+
+	// Shows the owner
 	if ((C.Ownership == null) || (C.Ownership.Name == null) || (C.Ownership.MemberNumber == null) || (C.Ownership.Start == null) || (C.Ownership.Stage == null)) {
 		DrawText(TextGet("Owner") + " " + (((C.Owner == null) || (C.Owner == "")) ? TextGet("OwnerNone") : C.Owner.replace("NPC-", "")), 550, 575, "Black", "Gray");
 		if ((C.Owner != null) && (C.Owner != "") && (C.ID != 0) && (NPCEventGet(C, "NPCCollaring") > 0)) DrawText(TextGet("CollaredFor") + " " + (Math.floor((CurrentTime - NPCEventGet(C, "NPCCollaring")) / 86400000)).toString() + " " + TextGet("Days"), 550, 650, "Black", "Gray");
