@@ -47,6 +47,7 @@ function CharacterReset(CharacterID, CharacterAssetFamily) {
 		IsOwner: function () { return ((NPCEventGet(this, "EndSubTrial") > 0) || (this.Name == Player.Owner.replace("NPC-", ""))) },
 		HasLover: function () { return ((this.Lover != null) && (this.Lover != "")) },
 		IsLoverOfPlayer: function () { return this.HasLover() && (this.Lover.MemberNumber == Player.MemberNumber); },
+		IsPlayersLover: function () { return Player.HasLover() && (Player.Lover.MemberNumber == this.MemberNumber); },
 		IsKneeling: function () { return ((this.Pose != null) && (this.Pose.indexOf("Kneel") >= 0)) },
 		IsNaked: function () { return CharacterIsNaked(this); },
 		IsDeaf: function () { return ((this.Effect.indexOf("DeafLight") >= 0) || (this.Effect.indexOf("DeafNormal") >= 0) || (this.Effect.indexOf("DeafHeavy") >= 0)) },
@@ -210,6 +211,7 @@ function CharacterOnlineRefresh(Char, data, SourceMemberNumber) {
 	Char.Creation = data.Creation;
 	if (Char.ID != 0) Char.ItemPermission = data.ItemPermission;
 	Char.Ownership = data.Ownership;
+	Char.Lover = data.Lover;
 	Char.Reputation = (data.Reputation != null) ? data.Reputation : [];
 	Char.Appearance = ServerAppearanceLoadFromBundle(Char, "Female3DCG", data.Appearance, SourceMemberNumber);
 	if (Char.ID != 0) InventoryLoad(Char, data.Inventory);
@@ -280,6 +282,7 @@ function CharacterLoadOnline(data, SourceMemberNumber) {
 		// Flags "refresh" if the ownership or inventory has changed
 		if (!Refresh && (JSON.stringify(Char.Ownership) !== JSON.stringify(data.Ownership))) Refresh = true;
 		if (!Refresh && (data.Inventory != null) && (Char.Inventory.length != data.Inventory.length)) Refresh = true;
+		if (!Refresh && (data.Lover != null)) Refresh = true;
 
 		// If we must refresh
 		if (Refresh) CharacterOnlineRefresh(Char, data, SourceMemberNumber);

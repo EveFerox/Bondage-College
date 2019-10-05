@@ -28,6 +28,7 @@ function ChatRoomCanGiveMoneyForOwner() { return ((ChatRoomMoneyForOwner > 0) &&
 function ChatRoomPlayerIsAdmin() { return ((ChatRoomData.Admin != null) && (ChatRoomData.Admin.indexOf(Player.MemberNumber) >= 0)) }
 function ChatRoomCurrentCharacterIsAdmin() { return ((CurrentCharacter != null) && (ChatRoomData.Admin != null) && (ChatRoomData.Admin.indexOf(CurrentCharacter.MemberNumber) >= 0)) }
 function ChatRoomLoverOptionCanAdd() { return !Player.HasLover(); }
+function ChatRoomLoverOptionCanRemove() { return CurrentCharacter.IsPlayersLover(); }
 
 // Creates the chat room input elements
 function ChatRoomCreateElement() {
@@ -616,6 +617,7 @@ function ChatRoomPayQuest(data) {
 
 //Sets CurrentCharacter as players lover
 function ChatRoomLoverAdd() {
+	console.error("ChatRoomLoverAdd");
 	var C = CurrentCharacter;
 	DialogLeave();
 
@@ -629,11 +631,47 @@ function ChatRoomLoverAdd() {
 		return;
 	}
 
-	Player.Lover = 
-	{
+	var Lover = {
 		MemberNumber: C.MemberNumber,
 		Name: C.Name
 	};
 
-	//TODO push to server
+	ChatRoomLoverSetAndSync(Lover);
+}
+
+function ChatRoomLoverRemove() {
+	console.error("ChatRoomLoverRemove");
+	var C = CurrentCharacter;
+	DialogLeave();
+
+	if (C == null) {
+		console.error("current char is null");
+		return;
+	}
+
+	if (!Player.HasLover()) {
+		console.error("player has not lover");
+		return;
+	}
+
+	if (!C.IsPlayersLover()) {
+		console.error("current char isnt players lover");
+		return;
+	}
+
+	ChatRoomLoverSetAndSync(null);
+}
+
+function ChatRoomLoverSetAndSync(Lover) {
+	console.error("ChatRoomLoverSetAndSync: " + Lover);
+	Player.Lover = Lover;
+	var data = 
+	{
+		ID: Player.OnlineID,
+		Lover: Lover,
+		ActivePose: Player.ActivePose,
+		Appearance: ServerAppearanceBundle(Player.Appearance)
+	};
+	ServerSend("ChatRoomCharacterUpdate", data);
+	ServerSend("AccountUpdate", data);
 }

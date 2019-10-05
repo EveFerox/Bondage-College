@@ -43,7 +43,7 @@ function ServerSend(Message, Data) {
 
 // Syncs some player information to the server
 function ServerPlayerSync() {
-	ServerSend("AccountUpdate", { Money: Player.Money, Owner: Player.Owner, Lover: Player.Lover });
+	ServerSend("AccountUpdate", { Money: Player.Money, Owner: Player.Owner });
 }
 
 // Syncs the full player inventory to the server
