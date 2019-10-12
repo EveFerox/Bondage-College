@@ -42,7 +42,11 @@ function InformationSheetRun() {
 	// Shows the lover
 	var LoverText = " ";
 	if (C.HasLover()) {
-		LoverText += C.Lover.Name + " (" + C.Lover.MemberNumber + ")";
+		if (typeof C.Lover === "object") {
+			LoverText += C.Lover.Name + " (" + C.Lover.MemberNumber + ")";
+		} else {
+			LoverText += C.Lover;
+		}
 	} else {
 		LoverText += TextGet("LoverNone");
 	}

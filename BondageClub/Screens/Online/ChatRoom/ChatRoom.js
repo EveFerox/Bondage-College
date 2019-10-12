@@ -617,7 +617,6 @@ function ChatRoomPayQuest(data) {
 
 //Sets CurrentCharacter as players lover
 function ChatRoomLoverAdd() {
-	console.error("ChatRoomLoverAdd");
 	var C = CurrentCharacter;
 	DialogLeave();
 
@@ -636,11 +635,10 @@ function ChatRoomLoverAdd() {
 		Name: C.Name
 	};
 
-	ChatRoomLoverSetAndSync(Lover);
+	ChatRoomLoverSend(Lover);
 }
 
 function ChatRoomLoverRemove() {
-	console.error("ChatRoomLoverRemove");
 	var C = CurrentCharacter;
 	DialogLeave();
 
@@ -659,19 +657,9 @@ function ChatRoomLoverRemove() {
 		return;
 	}
 
-	ChatRoomLoverSetAndSync(null);
+	ChatRoomLoverSend(null);
 }
 
-function ChatRoomLoverSetAndSync(Lover) {
-	console.error("ChatRoomLoverSetAndSync: " + Lover);
-	Player.Lover = Lover;
-	var data = 
-	{
-		ID: Player.OnlineID,
-		Lover: Lover,
-		ActivePose: Player.ActivePose,
-		Appearance: ServerAppearanceBundle(Player.Appearance)
-	};
-	ServerSend("ChatRoomCharacterUpdate", data);
-	ServerSend("AccountUpdate", data);
+function ChatRoomLoverSend(Lover) {
+	ServerSend("AccountLovers", { Lover: Lover });
 }

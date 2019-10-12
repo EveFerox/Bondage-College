@@ -22,6 +22,7 @@ function ServerInit() {
 	ServerSocket.on("AccountQueryResult", function (data) { ServerAccountQueryResult(data); });
 	ServerSocket.on("AccountBeep", function (data) { ServerAccountBeep(data); });
 	ServerSocket.on("AccountOwnership", function (data) { ServerAccountOwnership(data); });
+	ServerSocket.on("AccountLovers", function(data) { ServerAccountLovers(data) });
 }
 
 // When the server sends some information to the client, we keep it in variables
@@ -366,4 +367,20 @@ function ServerAccountOwnership(data) {
 		LoginValidCollar();
 	}
 
+}
+
+function ServerAccountLovers(data) {
+	console.error("ServerAccountLovers");
+	if (data == null) {
+		return;
+	}
+	if (typeof data !== "object") {
+		return;
+	}
+
+	Player.Lover = data.Lover;
+
+	if (Player.Lover == null) {
+		//TODO remove lover locks
+	}
 }

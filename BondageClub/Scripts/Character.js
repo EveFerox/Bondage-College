@@ -239,7 +239,7 @@ function CharacterLoadOnline(data, SourceMemberNumber) {
 		CharacterReset(Character.length, "Female3DCG");
 		Char = Character[Character.length - 1];
 		Char.Name = data.Name;
-		Char.Lover = (data.Lover != null) ? data.Lover : "";
+		Char.Lover = data.Lover;
 		Char.Owner = (data.Owner != null) ? data.Owner : "";
 		Char.Title = data.Title;
 		Char.AccountName = "Online-" + data.ID.toString();
@@ -282,7 +282,7 @@ function CharacterLoadOnline(data, SourceMemberNumber) {
 		// Flags "refresh" if the ownership or inventory has changed
 		if (!Refresh && (JSON.stringify(Char.Ownership) !== JSON.stringify(data.Ownership))) Refresh = true;
 		if (!Refresh && (data.Inventory != null) && (Char.Inventory.length != data.Inventory.length)) Refresh = true;
-		if (!Refresh && (data.Lover != null)) Refresh = true;
+		if (!Refresh && (Char.Lover != data.Lover)) Refresh = true;
 
 		// If we must refresh
 		if (Refresh) CharacterOnlineRefresh(Char, data, SourceMemberNumber);
