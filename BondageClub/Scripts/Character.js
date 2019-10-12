@@ -28,6 +28,7 @@ function CharacterReset(CharacterID, CharacterAssetFamily) {
 		MustDraw: false,
 		BlinkFactor: Math.round(Math.random() * 10) + 10,
 		AllowItem: true,
+		BlockItems: [],
 		HeightModifier: 0,
 		CanTalk: function () { return ((this.Effect.indexOf("GagLight") < 0) && (this.Effect.indexOf("GagNormal") < 0) && (this.Effect.indexOf("GagHeavy") < 0) && (this.Effect.indexOf("GagTotal") < 0)) },
 		CanWalk: function () { return ((this.Effect.indexOf("Freeze") < 0) && (this.Effect.indexOf("Tethered") < 0) && ((this.Pose == null) || (this.Pose.indexOf("Kneel") < 0) || (this.Effect.indexOf("KneelFreeze") < 0))) },
@@ -213,6 +214,7 @@ function CharacterOnlineRefresh(Char, data, SourceMemberNumber) {
 	Char.Ownership = data.Ownership;
 	Char.Lover = data.Lover;
 	Char.Reputation = (data.Reputation != null) ? data.Reputation : [];
+	Char.BlockItems = Array.isArray(data.BlockItems) ? data.BlockItems : [];
 	Char.Appearance = ServerAppearanceLoadFromBundle(Char, "Female3DCG", data.Appearance, SourceMemberNumber);
 	if (Char.ID != 0) InventoryLoad(Char, data.Inventory);
 	AssetReload(Char);
@@ -243,7 +245,7 @@ function CharacterLoadOnline(data, SourceMemberNumber) {
 		Char.Owner = (data.Owner != null) ? data.Owner : "";
 		Char.Title = data.Title;
 		Char.AccountName = "Online-" + data.ID.toString();
-		Char.MemberNumber = data.MemberNumber;
+		Char.MemberNumber = data.MemberNumber;	
 		var BackupCurrentScreen = CurrentScreen;
 		CurrentScreen = "ChatRoom";
 		CharacterLoadCSVDialog(Char, "Screens/Online/ChatRoom/Dialog_Online");
@@ -279,9 +281,10 @@ function CharacterLoadOnline(data, SourceMemberNumber) {
 								else if (((New.Property != null) && (Old.Property == null)) || ((New.Property == null) && (Old.Property != null))) Refresh = true;
 							}
 
-		// Flags "refresh" if the ownership or inventory has changed
+		// Flags "refresh" if the ownership or inventory or blockitems has changed
 		if (!Refresh && (JSON.stringify(Char.Ownership) !== JSON.stringify(data.Ownership))) Refresh = true;
 		if (!Refresh && (data.Inventory != null) && (Char.Inventory.length != data.Inventory.length)) Refresh = true;
+		if (!Refresh && (data.BlockItems != null) && (Char.BlockItems.length != data.BlockItems.length)) Refresh = true;
 		if (!Refresh && (Char.Lover != data.Lover)) Refresh = true;
 
 		// If we must refresh

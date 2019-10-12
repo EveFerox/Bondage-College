@@ -1,9 +1,13 @@
-﻿Name:
+Name:
 Name:
 Title:
 Titel:
+None
+---
 Mistress
 Herrin
+Club Slave
+Clubsklavin
 Head Maid
 Hausdame
 Maid
@@ -12,8 +16,18 @@ Master Kidnapper
 Kidnapper-Meisterin
 Kidnapper
 Kidnapperin
-None
----
+Patient
+Patientin
+Permanent Patient
+Dauerhafte Patientin
+Escaped Patient
+Entlaufene Patientin
+Nurse
+Schwester
+Doctor
+Doktor
+College Student
+College-Schülerin
 Foal
 Fohlen
 Farm Horse
@@ -60,10 +74,14 @@ Submissive:
 Unterwürfig:
 Maid Sorority:
 Hausmädchen:
-Gambling Hall:
-Spielhalle:
 Kidnappers League:
 Kidnapper-Liga:
+Asylum Nurse:
+Anstalts-Schwester:
+Asylum Patient:
+Anstalts-Patientin:
+Gambling Hall:
+Spielhalle:
 ABDL:
 ABDL:
 - Skills -
@@ -75,7 +93,7 @@ Entfesselung:
 Willpower:
 Willenskraft:
 Dressage:
-Pony-Dressur:
+Dressur:
 Global modifier:
 Globaler Modifikator:
 - Traits -
