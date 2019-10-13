@@ -132,6 +132,15 @@ function ServerValidateProperties(C, Item) {
 					E--;
 				}
 
+				// Make sure the lover lock is valid
+				if (Lock.Asset.LoverOnly && ((C.Lover == null) || (C.Lover.MemberNumber == null) || (Item.Property.LockMemberNumber == null) || (C.Lover.MemberNumber != Item.Property.LockMemberNumber))) {
+					delete Item.Property.LockedBy;
+					delete Item.Property.LockMemberNumber;
+					delete Item.Property.RemoveTimer;
+					Item.Property.Effect.splice(E, 1);
+					E--;
+				}
+
 			}
 
 			// Other effects can be removed
