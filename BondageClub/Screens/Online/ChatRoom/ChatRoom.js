@@ -11,6 +11,7 @@ var ChatRoomPlayerCanJoin = false;
 var ChatRoomMoneyForOwner = 0;
 var ChatRoomQuestGiven = [];
 var ChatRoomSpace = "";
+var ChatRoomSM = new ChatRoomStatusManager();
 
 // Returns TRUE if the dialog option is available
 function ChatRoomCanAddWhiteList() { return ((CurrentCharacter != null) && (CurrentCharacter.MemberNumber != null) && (Player.WhiteList.indexOf(CurrentCharacter.MemberNumber) < 0) && (Player.BlackList.indexOf(CurrentCharacter.MemberNumber) < 0)) }
@@ -30,9 +31,14 @@ function ChatRoomCurrentCharacterIsAdmin() { return ((CurrentCharacter != null) 
 
 // Creates the chat room input elements
 function ChatRoomCreateElement() {
-	if (document.getElementById("InputChat") == null) {
+	var elem = document.getElementById("InputChat");
+	if (elem == null) {
 		ElementCreateInput("InputChat", "text", "", "250");
-		document.getElementById("InputChat").setAttribute("autocomplete", "off");
+		elem = document.getElementById("InputChat");
+		elem.setAttribute("autocomplete", "off");
+		elem.oninput = function () { ChatRoomSM.InputChanged() };
+		elem.onfocus = function () { ChatRoomSM.InputFocusChanged(true) };
+		elem.onblur = function () { ChatRoomSM.InputFocusChanged(false) };
 		ElementCreateDiv("TextAreaChatLog");
 		ElementPositionFix("TextAreaChatLog", 36, 1005, 5, 988, 923);
 		ElementContent("TextAreaChatLog", ChatRoomLog);
@@ -53,6 +59,8 @@ function ChatRoomLoad() {
 	ElementRemove("InputDescription");
 	ElementRemove("InputSize");
 	ChatRoomCreateElement();
+
+	ChatRoomSM.Start();
 }
 
 // Draw the characters in the room
@@ -117,13 +125,34 @@ function ChatRoomDrawCharacter(DoClick) {
 			DrawCharacter(ChatRoomCharacter[C], (C % 5) * Space + X, Y + Math.floor(C / 5) * 500, Zoom);
 			if (ChatRoomTargetMemberNumber == ChatRoomCharacter[C].MemberNumber) DrawImage("Icons/Small/Whisper.png", (C % 5) * Space + X + 75 * Zoom, Y + Math.floor(C / 5) * 500 + 950 * Zoom);
 			
-			// Draw the friendlist / blacklist / whitelist icons
+			// Draw the icons
 			if (ChatRoomCharacter[C].MemberNumber != null) {
-				if (Player.WhiteList.indexOf(ChatRoomCharacter[C].MemberNumber) >= 0) DrawImage("Icons/Small/WhiteList.png", (C % 5) * Space + X + 75 * Zoom, Y + Math.floor(C / 5) * 500);
-				else if (Player.BlackList.indexOf(ChatRoomCharacter[C].MemberNumber) >= 0) DrawImage("Icons/Small/BlackList.png", (C % 5) * Space + X + 75 * Zoom, Y + Math.floor(C / 5) * 500);
-				if (Player.FriendList.indexOf(ChatRoomCharacter[C].MemberNumber) >= 0) DrawImage("Icons/Small/FriendList.png", (C % 5) * Space + X + 375 * Zoom, Y + Math.floor(C / 5) * 500);
-			}
+				if (ChatRoomCharacter[C].ID != 0) {
+					// whitelist
+					if (Player.WhiteList.indexOf(ChatRoomCharacter[C].MemberNumber) >= 0) DrawImage("Icons/Small/WhiteList.png", (C % 5) * Space + X + 75 * Zoom, Y + Math.floor(C / 5) * 500);
+					// if (Player.WhiteList.indexOf(ChatRoomCharacter[C].MemberNumber) >= 0) DrawImage("Icons/Small/WhiteList.png",(C % 5) * Space + X + 75 * Zoom, Y + 50 + Math.floor(C / 5) * 500);
+					// blacklist 
+					else if (Player.BlackList.indexOf(ChatRoomCharacter[C].MemberNumber) >= 0) DrawImage("Icons/Small/BlackList.png", (C % 5) * Space + X + 75 * Zoom, Y + Math.floor(C / 5) * 500);
+					// if (Player.FriendList.indexOf(ChatRoomCharacter[C].MemberNumber) >= 0) DrawImage("Icons/Small/FriendList.png", (C % 5) * Space + X + 75 * Zoom, Y + Math.floor(C / 5) * 500);
+					// friendlist
+					if (Player.FriendList.indexOf(ChatRoomCharacter[C].MemberNumber) >= 0) DrawImage("Icons/Small/FriendList.png", (C % 5) * Space + X + 375 * Zoom, Y + Math.floor(C / 5) * 500);
+				}
 
+				// Draw the status icon
+				var statusIcon = null;
+				switch (ChatRoomCharacter[C].Status) {
+					case ChatRoomSM.StatusTypes.Typing:
+						statusIcon = "Icons/Small/Typing.png";
+						break;
+					case ChatRoomSM.StatusTypes.Afk:
+						statusIcon = "Icons/Small/AFK.png";
+						break;
+					case ChatRoomSM.StatusTypes.None: // No status
+						break;
+				}
+
+				if (statusIcon != null) DrawImage(statusIcon, (C % 5) * Space + X + 375 * Zoom, Y + 50 +  Math.floor(C / 5) * 500);
+			}
 		}
 
 }
@@ -192,6 +221,7 @@ function ChatRoomClick() {
 		ElementRemove("TextAreaChatLog");
 		ServerSend("ChatRoomLeave", "");
 		CommonSetScreen("Online", "ChatSearch");
+		ChatRoomSM.Stop();
 	}
 
 }
@@ -501,6 +531,19 @@ function ChatRoomAllowItem(data) {
 			CurrentCharacter.AllowItem = data.AllowItem;
 			CharacterSetCurrent(CurrentCharacter);
 		}
+}
+
+function ChatRoomStatusEvent(data) {
+	if ((data == null) || (typeof data !== "object")) return;
+
+	// Update the character status
+	for (var C = 0; C < ChatRoomCharacter.length; C++) {
+		var Char = ChatRoomCharacter[C];
+		if (Char.MemberNumber == data.MemberNumber) {
+			Char.Status = data.Type;
+			break;
+		}
+	}
 }
 
 // When the player wants to change another player's outfit

@@ -18,6 +18,7 @@ function ServerInit() {
 	ServerSocket.on("ChatRoomSync", function (data) { ChatRoomSync(data); });
 	ServerSocket.on("ChatRoomMessage", function (data) { ChatRoomMessage(data); });
 	ServerSocket.on("ChatRoomAllowItem", function (data) { ChatRoomAllowItem(data); });
+	ServerSocket.on("ChatRoomStatusEvent", function (data) { ChatRoomStatusEvent(data); });
 	ServerSocket.on("PasswordResetResponse", function (data) { PasswordResetResponse(data); });
 	ServerSocket.on("AccountQueryResult", function (data) { ServerAccountQueryResult(data); });
 	ServerSocket.on("AccountBeep", function (data) { ServerAccountBeep(data); });
