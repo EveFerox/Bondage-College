@@ -11,6 +11,7 @@ var ChatRoomPlayerCanJoin = false;
 var ChatRoomMoneyForOwner = 0;
 var ChatRoomQuestGiven = [];
 var ChatRoomSpace = "";
+var ChatRoomMoveTarget = null;
 
 // Returns TRUE if the dialog option is available
 function ChatRoomCanAddWhiteList() { return ((CurrentCharacter != null) && (CurrentCharacter.MemberNumber != null) && (Player.WhiteList.indexOf(CurrentCharacter.MemberNumber) < 0) && (Player.BlackList.indexOf(CurrentCharacter.MemberNumber) < 0)) }
@@ -27,6 +28,7 @@ function ChatRoomCanServeDrink() { return ((CurrentCharacter != null) && Current
 function ChatRoomCanGiveMoneyForOwner() { return ((ChatRoomMoneyForOwner > 0) && (CurrentCharacter != null) && (Player.Ownership != null) && (Player.Ownership.Stage == 1) && (Player.Ownership.MemberNumber == CurrentCharacter.MemberNumber)) }
 function ChatRoomPlayerIsAdmin() { return ((ChatRoomData.Admin != null) && (ChatRoomData.Admin.indexOf(Player.MemberNumber) >= 0)) }
 function ChatRoomCurrentCharacterIsAdmin() { return ((CurrentCharacter != null) && (ChatRoomData.Admin != null) && (ChatRoomData.Admin.indexOf(CurrentCharacter.MemberNumber) >= 0)) }
+function ChatRoomHasMoveTarget() { return ChatRoomMoveTarget != null }
 
 // Creates the chat room input elements
 function ChatRoomCreateElement() {
@@ -537,6 +539,30 @@ function ChatRoomViewProfile() {
 // Sends an administrative command to the server for the chat room from the character dialog
 function ChatRoomAdminAction(ActionType, Publish) {
 	if ((CurrentCharacter != null) && (CurrentCharacter.MemberNumber != null) && ChatRoomPlayerIsAdmin()) {
+		if (ActionType == "Move") {
+			if (ChatRoomMoveTarget == null) {
+				ChatRoomMoveTarget = CurrentCharacter.MemberNumber;
+			} else {
+				ServerSend("ChatRoomAdmin",
+				{
+					MemberNumber: Player.ID,
+					TargetMemberNumber: ChatRoomMoveTarget,
+					DestinationMemberNumber: CurrentCharacter.MemberNumber,
+					Action: ActionType,
+					Publish: ((Publish == null) || (Publish != "false"))
+				});
+				ChatRoomMoveTarget = null;
+			}
+			DialogLeave();
+			return;
+		}
+
+		if (ActionType == "MoveCancel") {
+			ChatRoomMoveTarget = null;
+			DialogLeave();
+			return;
+		}
+
 		ServerSend("ChatRoomAdmin", { MemberNumber: CurrentCharacter.MemberNumber, Action: ActionType, Publish: ((Publish == null) || (Publish != "false")) });
 		if ((ActionType == "MoveLeft") || (ActionType == "MoveRight")) {
 			var Pos = ChatRoomCharacter.indexOf(CurrentCharacter);

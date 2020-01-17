@@ -133,6 +133,7 @@ ServerBan,,,TargetCharacterName was banned by SourceCharacter.
 ServerKick,,,TargetCharacterName was kicked-out by SourceCharacter.
 ServerMoveLeft,,,TargetCharacterName was moved to the left by SourceCharacter.
 ServerMoveRight,,,TargetCharacterName was moved to the right by SourceCharacter.
+ServerMove,,,SourceCharacter swapped TargetCharacterName and DestinationCharacterName places.
 ServerPromoteAdmin,,,TargetCharacterName was promoted to administrator by SourceCharacter.
 ServerDemoteAdmin,,,TargetCharacterName was demoted from administration by SourceCharacter.
 ServerUpdateRoom,,,SourceCharacter updated the room. Name: ChatRoomName. Limit: ChatRoomLimit.  ChatRoomPrivacy.  ChatRoomLocked.
