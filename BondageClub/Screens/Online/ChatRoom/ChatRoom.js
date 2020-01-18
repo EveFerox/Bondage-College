@@ -99,7 +99,12 @@ function ChatRoomDrawCharacter(DoClick) {
 	for (var C = 0; C < ChatRoomCharacter.length; C++)
 		if (DoClick) {
 			if ((MouseX >= (C % 5) * Space + X) && (MouseX <= (C % 5) * Space + X + 450 * Zoom) && (MouseY >= Y + Math.floor(C / 5) * 500) && (MouseY <= Y + Math.floor(C / 5) * 500 + 1000 * Zoom)) {
-				if ((MouseY <= Y + Math.floor(C / 5) * 500 + 900 * Zoom) && (Player.GameplaySettings && Player.GameplaySettings.BlindDisableExamine ? (!(Player.Effect.indexOf("BlindHeavy") >= 0) || ChatRoomCharacter[C].ID == Player.ID): true)) {
+				if ((MouseY <= Y + Math.floor(C / 5) * 500 + 900 * Zoom) && (Player.GameplaySettings && Player.GameplaySettings.BlindDisableExamine ? (!(Player.Effect.indexOf("BlindHeavy") >= 0) || ChatRoomCharacter[C].ID == Player.ID) : true)) {
+					if (ChatRoomHasMoveTarget() && ChatRoomMoveTarget != ChatRoomCharacter[C].MemberNumber) {
+						// Character to move selected, complete move if not clicking the same character again
+						ChatRoomCompleteMove(ChatRoomCharacter[C].MemberNumber);
+						break;
+					}
 					ElementRemove("InputChat");
 					ElementRemove("TextAreaChatLog");
 					ChatRoomBackground = ChatRoomData.Background;
@@ -540,19 +545,7 @@ function ChatRoomViewProfile() {
 function ChatRoomAdminAction(ActionType, Publish) {
 	if ((CurrentCharacter != null) && (CurrentCharacter.MemberNumber != null) && ChatRoomPlayerIsAdmin()) {
 		if (ActionType == "Move") {
-			if (ChatRoomMoveTarget == null) {
-				ChatRoomMoveTarget = CurrentCharacter.MemberNumber;
-			} else {
-				ServerSend("ChatRoomAdmin",
-				{
-					MemberNumber: Player.ID,
-					TargetMemberNumber: ChatRoomMoveTarget,
-					DestinationMemberNumber: CurrentCharacter.MemberNumber,
-					Action: ActionType,
-					Publish: ((Publish == null) || (Publish != "false"))
-				});
-				ChatRoomMoveTarget = null;
-			}
+			ChatRoomMoveTarget = CurrentCharacter.MemberNumber;
 			DialogLeave();
 			return;
 		}
@@ -572,6 +565,19 @@ function ChatRoomAdminAction(ActionType, Publish) {
 			CurrentCharacter.CurrentDialog = CurrentCharacter.CurrentDialog.replace("CharacterPosition", Pos.toString());
 		} else DialogLeave();
 	}
+}
+
+function ChatRoomCompleteMove(MemberNumber) {
+	if (ChatRoomMoveTarget == null) return;
+	ServerSend("ChatRoomAdmin",
+	{
+		MemberNumber: Player.ID,
+		TargetMemberNumber: ChatRoomMoveTarget,
+		DestinationMemberNumber: MemberNumber,
+		Action: "Move",
+		Publish: true
+	});
+	ChatRoomMoveTarget = null;
 }
 
 // Sends an administrative command to the server from the chat text field
