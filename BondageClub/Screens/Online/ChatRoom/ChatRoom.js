@@ -547,6 +547,17 @@ function ChatRoomSync(data) {
 	}
 }
 
+function ChatRoomSyncSingle(data) {
+	if (data == null) return;
+	if (typeof data !== "object") return;
+
+	for (var C = 0; C < ChatRoomCharacter.length; C++) {
+		if (ChatRoomCharacter[C].MemberNumber == data.Character.MemberNumber) {
+			ChatRoomCharacter[C] = CharacterLoadOnline(data.Character, data.SourceMemberNumber);
+		}
+	}
+}
+
 // Refreshes the chat log element
 function ChatRoomRefreshChatSettings(C) {
 	if (C.ChatSettings) {
