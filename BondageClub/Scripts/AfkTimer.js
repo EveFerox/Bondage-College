@@ -1,27 +1,34 @@
 
 var AfkTimerTimeoutTimeMs = 1000 * 60 * 5; //5 minutes
+var AfkTimerIsEnabled = null;
 
-var AfkTimerIsActive = false;
-
+var AfkTimerEventsList = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
 var AfkTimerTimeoutID;
 
-function AfkTimerInit() {
+function AfkTimerReset() {
+    clearTimeout(AfkTimerTimeoutID);
+    AfkTimerTimeoutID = setTimeout(AfkTimerSetIsAfk, AfkTimerTimeoutTimeMs);
+}
 
-    function resetTimer() {
-        clearTimeout(AfkTimerTimeoutID);
-        AfkTimerTimeoutID = setTimeout(AfkTimerSetIsAfk, AfkTimerTimeoutTimeMs);
-    }
+function AfkTimerStart() {
+    AfkTimerEventsList.forEach(e => document.addEventListener(e, AfkTimerReset, true));
+}
 
-    var events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'];
-    events.forEach(function (name) {
-        document.addEventListener(name, resetTimer, true);
-    });
+function AfkTimerStop() {
+    AfkTimerEventsList.forEach(e => document.removeEventListener(e, AfkTimerReset, true));
+}
+
+function AfkTimerSetEnabled(Enabled) {
+    if (typeof Enabled !== 'boolean') return;
+    if (AfkTimerIsEnabled == Enabled) return;
+    AfkTimerIsEnabled = Enabled;
+
+    if (AfkTimerIsEnabled)
+        AfkTimerStart();
+    else
+        AfkTimerStop();
 }
 
 function AfkTimerSetIsAfk() {
-    var emoticon = InventoryGet(Player, "Emoticon");
-    if (emoticon == null || emoticon.Property.Expression == null) {
-        // Set AFK emoticon only if no other emoticon used
-        CharacterSetFacialExpression(Player, "Emoticon", "Afk");
-    }
+    CharacterSetFacialExpression(Player, "Emoticon", "Afk");
 }

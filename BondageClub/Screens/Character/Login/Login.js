@@ -191,6 +191,8 @@ function LoginResponse(C) {
 			Player.BlackList = C.BlackList;
 			Player.FriendList = C.FriendList;
 
+			PreferenceInit(Player);
+
 			// Loads the player character model and data
 			Player.Appearance = ServerAppearanceLoadFromBundle(Player, C.AssetFamily, C.Appearance);
 			InventoryLoad(Player, C.Inventory);

@@ -17,6 +17,11 @@ var PreferenceSettingsSensDepIndex = 0;
 var PreferenceSettingsVolumeList = null;
 var PreferenceSettingsVolumeIndex = 0;
 
+// When player logs in
+function PreferenceInit(Player) {
+	AfkTimerSetEnabled(Player.GameplaySettings && Player.GameplaySettings.EnableAfkTimer != false);
+}
+
 // When the preference screens loads
 function PreferenceLoad() {
 
@@ -43,12 +48,17 @@ function PreferenceLoad() {
         PlayBeeps: false
     };
 
-	//if the user never set the gameplay settings before, construct them to replicate the default behavior
-	if (!Player.GameplaySettings || (typeof Player.GameplaySettings.SensDepChatLog !== "string") || (typeof Player.GameplaySettings.BlindDisableExamine !== "boolean") || (typeof Player.GameplaySettings.DisableAutoRemoveLogin !== "boolean")) Player.GameplaySettings = {
-		SensDepChatLog: "Normal",
-        BlindDisableExamine: false,
-        DisableAutoRemoveLogin: false
-    };
+	// GameplaySettings
+	if (!Player.GameplaySettings)
+		Player.GameplaySettings = {};
+	if (typeof Player.GameplaySettings.SensDepChatLog !== "string")
+		Player.GameplaySettings.SensDepChatLog = "Normal";
+	if (typeof Player.GameplaySettings.BlindDisableExamine !== "boolean")
+		Player.GameplaySettings.BlindDisableExamine = false;
+	if (typeof Player.GameplaySettings.DisableAutoRemoveLogin !== "boolean")
+		Player.GameplaySettings.DisableAutoRemoveLogin = false;
+	if (typeof Player.GameplaySettings.EnableAfkTimer !== "boolean")
+		Player.GameplaySettings.EnableAfkTimer = true;
 
 	// Sets the chat themes
 	PreferenceChatColorThemeList = ["Light", "Dark"];
@@ -87,14 +97,13 @@ function PreferenceRun() {
 	DrawText(TextGet("ItemPermission") + " " + TextGet("PermissionLevel" + Player.ItemPermission.toString()), 615, 325, "Black", "Gray");
     //DrawText(TextGet("AudioVolume"), 800, 425, "Black", "Gray");
 	DrawText(TextGet("SensDepSetting"), 800, 428, "Black", "Gray");
-    //DrawText(TextGet("PlayBeeps"), 600, 585, "Black", "Gray");
-    //DrawButton(500, 552, 64, 64, "", "White", (Player.AudioSettings && Player.AudioSettings.PlayBeeps) ? "Icons/Checked.png" : "");
-    DrawText(TextGet("BlindDisableExamine"), 600, 505, "Black", "Gray");
-    DrawButton(500, 472, 64, 64, "", "White", (Player.GameplaySettings && Player.GameplaySettings.BlindDisableExamine) ? "Icons/Checked.png" : "");
-    DrawText(TextGet("DisableAutoRemoveLogin"), 600, 585, "Black", "Gray");
-    DrawButton(500, 552, 64, 64, "", "White", (Player.GameplaySettings && Player.GameplaySettings.DisableAutoRemoveLogin) ? "Icons/Checked.png" : "");
-    DrawText(TextGet("ForceFullHeight"), 600, 665, "Black", "Gray");
-    DrawButton(500, 632, 64, 64, "", "White", (Player.VisualSettings && Player.VisualSettings.ForceFullHeight) ? "Icons/Checked.png" : "");
+	
+	// Checkboxes
+	DrawCheckbox(500, 472, 64, 64, TextGet("BlindDisableExamine"), Player.GameplaySettings.BlindDisableExamine);
+	DrawCheckbox(500, 552, 64, 64, TextGet("DisableAutoRemoveLogin"), Player.GameplaySettings.DisableAutoRemoveLogin);
+	DrawCheckbox(500, 632, 64, 64, TextGet("EnableAfkTimer"), Player.GameplaySettings.EnableAfkTimer);
+	DrawCheckbox(500, 712, 64, 64, TextGet("ForceFullHeight"), Player.VisualSettings.ForceFullHeight);
+
 	MainCanvas.textAlign = "center";
     //DrawBackNextButton(500, 392, 250, 64, Player.AudioSettings.Volume * 100 + "%", "White", "",
       //  () => PreferenceSettingsVolumeList[(PreferenceSettingsVolumeIndex + PreferenceSettingsVolumeList.length - 1) % PreferenceSettingsVolumeList.length] * 100 + "%",
@@ -111,7 +120,6 @@ function PreferenceRun() {
 		DrawButton(1815, 190, 90, 90, "", "White", "Icons/Chat.png");
 		DrawButton(1815, 305, 90, 90, "", "White", "Icons/Audio.png");
 	}
-
 }
 
 // When the user clicks in the preference screen
@@ -151,12 +159,14 @@ function PreferenceClick() {
 		else PreferenceSettingsSensDepIndex = (PreferenceSettingsSensDepIndex + 1) % PreferenceSettingsSensDepList.length;
 		Player.GameplaySettings.SensDepChatLog = PreferenceSettingsSensDepList[PreferenceSettingsSensDepIndex];
 	}
-	if ((MouseX >= 500) && (MouseX < 564)) {
-		//if ((MouseY >= 552) && (MouseY < 616)) Player.AudioSettings.PlayBeeps = !Player.AudioSettings.PlayBeeps;
-		if ((MouseY >= 472) && (MouseY < 536)) Player.GameplaySettings.BlindDisableExamine = !Player.GameplaySettings.BlindDisableExamine;
-        if ((MouseY >= 552) && (MouseY < 616)) Player.GameplaySettings.DisableAutoRemoveLogin = !Player.GameplaySettings.DisableAutoRemoveLogin;
-		if ((MouseY >= 632) && (MouseY < 696)) Player.VisualSettings.ForceFullHeight = !Player.VisualSettings.ForceFullHeight;
+
+	if (CommonIsClickAt(500, 472, 64, 64)) Player.GameplaySettings.BlindDisableExamine = !Player.GameplaySettings.BlindDisableExamine;
+	if (CommonIsClickAt(500, 552, 64, 64)) Player.GameplaySettings.DisableAutoRemoveLogin = !Player.GameplaySettings.DisableAutoRemoveLogin;
+	if (CommonIsClickAt(500, 632, 64, 64)) {
+		Player.GameplaySettings.EnableAfkTimer = !Player.GameplaySettings.EnableAfkTimer;
+		AfkTimerSetEnabled(Player.GameplaySettings.EnableAfkTimer);
 	}
+	if (CommonIsClickAt(500, 712, 64, 64)) Player.VisualSettings.ForceFullHeight = !Player.VisualSettings.ForceFullHeight;
 }
 
 // When the user exit the preference screen, we push the data back to the server
@@ -225,7 +235,6 @@ function PreferenceSubscreenChatRun() {
 	DrawCharacter(Player, 50, 50, 0.9);
 }
 
-
 function PreferenceSubscreenAudioClick() {
 	// If the user clicked the exit icon to return to the main screen
 	if ((MouseX >= 1815) && (MouseX < 1905) && (MouseY >= 75) && (MouseY < 165) && (PreferenceColorPick == "")) {
@@ -246,7 +255,6 @@ function PreferenceSubscreenAudioClick() {
 		if ((MouseY >= 352) && (MouseY < 352+64)) Player.AudioSettings.PlayVibes = !Player.AudioSettings.PlayVibes;
 	}
 }
-
 
 // Redirected to from the main Click function if the player is in the chat settings subscreen
 function PreferenceSubscreenChatClick() {
