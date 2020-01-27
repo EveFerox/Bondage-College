@@ -481,7 +481,7 @@ function ChatRoomMessage(data) {
 						else msg = msg.replace(dictionary[D].Tag, ChatRoomHTMLEntities(dictionary[D].Text));
 					}
 				}
-				ChatRoomMessageActionAudioPlay(data);
+				AudioPlayContent(data);
 			}
 
 			if (data.Type != null) {
