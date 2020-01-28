@@ -30,5 +30,6 @@ function AfkTimerSetEnabled(Enabled) {
 }
 
 function AfkTimerSetIsAfk() {
+    if (CurrentScreen != "ChatRoom") return;
     CharacterSetFacialExpression(Player, "Emoticon", "Afk");
 }
