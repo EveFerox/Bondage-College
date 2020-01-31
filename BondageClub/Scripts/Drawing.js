@@ -158,12 +158,13 @@ function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed) {
 
 			// Draw all the possible zones in transparent gray
 			for (var A = 0; A < AssetGroup.length; A++)
-				if (AssetGroup[A].Zone != null)
-					DrawAssetGroupZone(C, AssetGroup[A].Zone, HeightRatio, X, Y, "#80808040", 6);
+				if (AssetGroup[A].Zone != null) {
+					var G = InventoryGet(C, AssetGroup[A].Name);
+					DrawAssetGroupZone(C, AssetGroup[A].Zone, HeightRatio, X, Y, G == null ? "#80808040" : "#d5a300", 6);
+				}
 
 			// Draw the focused zone in cyan
 			DrawAssetGroupZone(C, C.FocusGroup.Zone, HeightRatio, X, Y, "cyan");
-
 		}
 
 		// Draw the character name below herself
@@ -173,7 +174,6 @@ function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed) {
 				DrawText(C.Name, X + 255 * Zoom, Y + 980 * ((C.Pose.indexOf("SuspensionHogtied") < 0) ? Zoom : Zoom / HeightRatio), (CommonIsColor(C.LabelColor)) ? C.LabelColor : "White", "Black");
 				MainCanvas.font = "36px Arial";
 			}
-
 	}
 }
 
