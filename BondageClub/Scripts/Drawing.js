@@ -158,9 +158,14 @@ function DrawCharacter(C, X, Y, Zoom, IsHeightResizeAllowed) {
 
 			// Draw all the possible zones in transparent gray
 			for (var A = 0; A < AssetGroup.length; A++)
-				if (AssetGroup[A].Zone != null) {
-					var G = InventoryGet(C, AssetGroup[A].Name);
-					DrawAssetGroupZone(C, AssetGroup[A].Zone, HeightRatio, X, Y, G == null ? "#80808040" : "#d5a300", 6);
+				if (AssetGroup[A].Zone != null && AssetGroup[A].Name != C.FocusGroup.Name) {
+					var color = "#80808040";
+
+					if (InventoryGet(C, AssetGroup[A].Name) != null) color = "#d5a300";
+
+					if (InventoryGroupIsBlocked(C, AssetGroup[A].Name)) color = "#880005";
+
+					DrawAssetGroupZone(C, AssetGroup[A].Zone, HeightRatio, X, Y, color, 6);
 				}
 
 			// Draw the focused zone in cyan
