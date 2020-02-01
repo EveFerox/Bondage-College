@@ -208,7 +208,11 @@ function DialogMenuButtonBuild(C) {
 	if (DialogProgress < 0) {
 		if ((DialogInventory.length > 12) && ((Player.CanInteract() && !InventoryGroupIsBlocked(C)) || DialogItemPermissionMode)) DialogMenuButton.push("Next");
 		if (C.FocusGroup.Name == "ItemMouth" || C.FocusGroup.Name == "ItemMouth2" || C.FocusGroup.Name == "ItemMouth3") DialogMenuButton.push("ChangeLayersMouth");
-		if (InventoryItemHasEffect(Item, "Lock", true) && DialogCanUnlock(C, Item) && InventoryAllow(C, Item.Asset.Prerequisite) && !InventoryGroupIsBlocked(C) && (Player.CanInteract() || ((C.ID == 0) && InventoryItemHasEffect(Item, "Block", true)))) DialogMenuButton.push("Unlock");
+		if (InventoryItemHasEffect(Item, "Lock", true) && DialogCanUnlock(C, Item) && InventoryAllow(C, Item.Asset.Prerequisite) && !InventoryGroupIsBlocked(C) && (Player.CanInteract() || ((C.ID == 0) && InventoryItemHasEffect(Item, "Block", true)))) {
+			DialogMenuButton.push("Unlock");
+			// Add struggle or remove buttons to completely remove the restraint
+			DialogMenuButton.push(C.ID == 0 ? "Struggle" : "Remove");
+		}
 		if ((Item != null) && (C.ID == 0) && (!Player.CanInteract() || (InventoryItemHasEffect(Item, "Lock", true) && !DialogCanUnlock(C, Item))) && (DialogMenuButton.indexOf("Unlock") < 0) && InventoryAllow(C, Item.Asset.Prerequisite) && !InventoryGroupIsBlocked(C)) DialogMenuButton.push("Struggle");
 		if (InventoryItemHasEffect(Item, "Lock", true) && !Player.IsBlind() && (Item.Property != null) && (Item.Property.LockedBy != null) && (Item.Property.LockedBy != "")) DialogMenuButton.push("InspectLock");
 		if ((Item != null) && Item.Asset.AllowLock && !InventoryItemHasEffect(Item, "Lock", true) && Player.CanInteract() && InventoryAllow(C, Item.Asset.Prerequisite) && !InventoryGroupIsBlocked(C)) DialogMenuButton.push("Lock");
@@ -482,7 +486,7 @@ function DialogMenuButtonClick() {
 			else if ((DialogMenuButton[I] == "Unlock") && (Item != null)) {
 				if (InventoryItemHasEffect(Item, "Lock", false) == false &&
 					InventoryItemHasEffect(Item, "Lock", true) && 
-					(C.ID != 0 || C.IsRestrained() == false)) {
+					(C.ID != 0 || C.CanInteract())) {
 					// Immediately unlock if the item is padlocked
 					InventoryUnlock(C, C.FocusGroup.Name);
 					ChatRoomPublishAction(C, Item, null, false, "ActionUnlock");
