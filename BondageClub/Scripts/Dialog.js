@@ -478,8 +478,24 @@ function DialogMenuButtonClick() {
 				return;
 			}
 
-			// Unlock/Remove/Struggle Icon - Starts the struggling mini-game (can be impossible to complete)
-			else if (((DialogMenuButton[I] == "Unlock") || (DialogMenuButton[I] == "Remove") || (DialogMenuButton[I] == "Struggle") || (DialogMenuButton[I] == "Dismount") || (DialogMenuButton[I] == "Escape")) && (Item != null)) {
+			// Unlock
+			else if ((DialogMenuButton[I] == "Unlock") && (Item != null)) {
+				if (InventoryItemHasEffect(Item, "Lock", false) == false &&
+					InventoryItemHasEffect(Item, "Lock", true) && 
+					(C.ID != 0 || C.IsRestrained() == false)) {
+					// Immediately unlock if the item is padlocked
+					InventoryUnlock(C, C.FocusGroup.Name);
+					ChatRoomPublishAction(C, Item, null, false, "ActionUnlock");
+					DialogLeave();
+				} else {
+					// Struggle if item is locked by itself
+					DialogProgressStart(C, Item, null);
+				}
+				return;
+			}
+
+			// Remove/Struggle Icon - Starts the struggling mini-game (can be impossible to complete)
+			else if (((DialogMenuButton[I] == "Remove") || (DialogMenuButton[I] == "Struggle") || (DialogMenuButton[I] == "Dismount") || (DialogMenuButton[I] == "Escape")) && (Item != null)) {
 				DialogProgressStart(C, Item, null);
 				return;
 			}
@@ -889,21 +905,8 @@ function DialogDrawItemMenu(C) {
 			// Stops the dialog sounds
 			AudioDialogStop();
 
-			var PublishAction = null;
-
-			// Add / swap / remove the item
-			
-			if (DialogProgressPrevItem != null && 
-				InventoryItemHasEffect(DialogProgressPrevItem, "Lock", false) == false && 
-				InventoryItemHasEffect(DialogProgressPrevItem, "Lock", true)) {
-				// Item is locked with a padlock, remove it first
-				InventoryUnlock(C, C.FocusGroup.Name);
-				PublishAction = "ActionUnlock";
-
-			} else {
-				InventoryRemove(C, C.FocusGroup.Name);
-				if (DialogProgressNextItem != null) InventoryWear(C, DialogProgressNextItem.Asset.Name, DialogProgressNextItem.Asset.Group.Name, (DialogColorSelect == null) ? "Default" : DialogColorSelect, SkillGetLevel(Player, "Bondage"));
-			}
+			InventoryRemove(C, C.FocusGroup.Name);
+			if (DialogProgressNextItem != null) InventoryWear(C, DialogProgressNextItem.Asset.Name, DialogProgressNextItem.Asset.Group.Name, (DialogColorSelect == null) ? "Default" : DialogColorSelect, SkillGetLevel(Player, "Bondage"));
 
 			// remove associated items at the same time
 			if (InventoryGet(C, "ItemNeck") == null) InventoryRemove(C, "ItemNeckAccessories");
@@ -928,9 +931,9 @@ function DialogDrawItemMenu(C) {
 			// Check to open the extended menu of the item.  In a chat room, we publish the result for everyone
 			if ((DialogProgressNextItem != null) && DialogProgressNextItem.Asset.Extended) {
 				DialogInventoryBuild(C);
-				ChatRoomPublishAction(C, DialogProgressPrevItem, DialogProgressNextItem, false, PublishAction);
+				ChatRoomPublishAction(C, DialogProgressPrevItem, DialogProgressNextItem, false);
 				DialogExtendItem(InventoryGet(C, DialogProgressNextItem.Asset.Group.Name));
-			} else ChatRoomPublishAction(C, DialogProgressPrevItem, DialogProgressNextItem, true, PublishAction);
+			} else ChatRoomPublishAction(C, DialogProgressPrevItem, DialogProgressNextItem, true);
 
 			// Rebuilds the menu
 			DialogEndExpression();
