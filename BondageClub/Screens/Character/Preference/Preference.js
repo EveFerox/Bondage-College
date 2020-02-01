@@ -159,11 +159,13 @@ function PreferenceClick() {
 	}
 
 	// Preference check boxes
-	if ((MouseX >= 500) && (MouseX < 564)) {
-		if ((MouseY >= 472) && (MouseY < 536)) Player.GameplaySettings.BlindDisableExamine = !Player.GameplaySettings.BlindDisableExamine;
-        if ((MouseY >= 552) && (MouseY < 616)) Player.GameplaySettings.DisableAutoRemoveLogin = !Player.GameplaySettings.DisableAutoRemoveLogin;
-		if ((MouseY >= 632) && (MouseY < 696)) Player.VisualSettings.ForceFullHeight = !Player.VisualSettings.ForceFullHeight;
+	if (CommonIsClickAt(500, 472, 64, 64)) Player.GameplaySettings.BlindDisableExamine = !Player.GameplaySettings.BlindDisableExamine;
+	if (CommonIsClickAt(500, 552, 64, 64)) Player.GameplaySettings.DisableAutoRemoveLogin = !Player.GameplaySettings.DisableAutoRemoveLogin;
+	if (CommonIsClickAt(500, 632, 64, 64)) {
+		Player.GameplaySettings.EnableAfkTimer = !Player.GameplaySettings.EnableAfkTimer;
+		AfkTimerSetEnabled(Player.GameplaySettings.EnableAfkTimer);
 	}
+	if (CommonIsClickAt(500, 712, 64, 64)) Player.VisualSettings.ForceFullHeight = !Player.VisualSettings.ForceFullHeight;
 
 }
 
