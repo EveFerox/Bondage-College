@@ -889,9 +889,21 @@ function DialogDrawItemMenu(C) {
 			// Stops the dialog sounds
 			AudioDialogStop();
 
+			var PublishAction = null;
+
 			// Add / swap / remove the item
-			InventoryRemove(C, C.FocusGroup.Name);
-			if (DialogProgressNextItem != null) InventoryWear(C, DialogProgressNextItem.Asset.Name, DialogProgressNextItem.Asset.Group.Name, (DialogColorSelect == null) ? "Default" : DialogColorSelect, SkillGetLevel(Player, "Bondage"));
+			
+			if (DialogProgressPrevItem != null && 
+				InventoryItemHasEffect(DialogProgressPrevItem, "Lock", false) == false && 
+				InventoryItemHasEffect(DialogProgressPrevItem, "Lock", true)) {
+				// Item is locked with a padlock, remove it first
+				InventoryUnlock(C, C.FocusGroup.Name);
+				PublishAction = "ActionUnlock";
+
+			} else {
+				InventoryRemove(C, C.FocusGroup.Name);
+				if (DialogProgressNextItem != null) InventoryWear(C, DialogProgressNextItem.Asset.Name, DialogProgressNextItem.Asset.Group.Name, (DialogColorSelect == null) ? "Default" : DialogColorSelect, SkillGetLevel(Player, "Bondage"));
+			}
 
 			// remove associated items at the same time
 			if (InventoryGet(C, "ItemNeck") == null) InventoryRemove(C, "ItemNeckAccessories");
@@ -916,9 +928,9 @@ function DialogDrawItemMenu(C) {
 			// Check to open the extended menu of the item.  In a chat room, we publish the result for everyone
 			if ((DialogProgressNextItem != null) && DialogProgressNextItem.Asset.Extended) {
 				DialogInventoryBuild(C);
-				ChatRoomPublishAction(C, DialogProgressPrevItem, DialogProgressNextItem, false);
+				ChatRoomPublishAction(C, DialogProgressPrevItem, DialogProgressNextItem, false, PublishAction);
 				DialogExtendItem(InventoryGet(C, DialogProgressNextItem.Asset.Group.Name));
-			} else ChatRoomPublishAction(C, DialogProgressPrevItem, DialogProgressNextItem, true);
+			} else ChatRoomPublishAction(C, DialogProgressPrevItem, DialogProgressNextItem, true, PublishAction);
 
 			// Rebuilds the menu
 			DialogEndExpression();
