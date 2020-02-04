@@ -237,19 +237,24 @@ function InventoryRemove(C, AssetGroup) {
 
 }
 
-// Returns TRUE if the focused group for a character is blocked and cannot be used
-function InventoryGroupIsBlocked(C) {
+// Returns TRUE if the group for a character is blocked and cannot be used
+function InventoryGroupIsBlocked(C, GroupName = null) {
+
+	if (GroupName == null) {
+		// Default to characters focused group
+		GroupName = C.FocusGroup.Name;
+	}
 
 	// Items can block each other (hoods blocks gags, belts blocks eggs, etc.)
 	for (var E = 0; E < C.Appearance.length; E++) {
-		if (!C.Appearance[E].Asset.Group.Clothing && (C.Appearance[E].Asset.Block != null) && (C.Appearance[E].Asset.Block.includes(C.FocusGroup.Name))) return true;
-		if (!C.Appearance[E].Asset.Group.Clothing && (C.Appearance[E].Property != null) && (C.Appearance[E].Property.Block != null) && (C.Appearance[E].Property.Block.indexOf(C.FocusGroup.Name) >= 0)) return true;
+		if (!C.Appearance[E].Asset.Group.Clothing && (C.Appearance[E].Asset.Block != null) && (C.Appearance[E].Asset.Block.includes(GroupName))) return true;
+		if (!C.Appearance[E].Asset.Group.Clothing && (C.Appearance[E].Property != null) && (C.Appearance[E].Property.Block != null) && (C.Appearance[E].Property.Block.indexOf(GroupName) >= 0)) return true;
 	}
 
 	// If another character is enclosed, items other than the enclosing one cannot be used
 	if ((C.ID != 0) && C.IsEnclose()) {
 		for (var E = 0; E < C.Appearance.length; E++)
-			if ((C.Appearance[E].Asset.Group.Name == C.FocusGroup.Name) && InventoryItemHasEffect(C.Appearance[E], "Enclose"))
+			if ((C.Appearance[E].Asset.Group.Name == GroupName) && InventoryItemHasEffect(C.Appearance[E], "Enclose"))
 				return false;
 		return true;
 	}

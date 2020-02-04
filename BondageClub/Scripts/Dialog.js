@@ -17,6 +17,8 @@ var DialogInventory = [];
 var DialogInventoryOffset = 0;
 var DialogFocusItem = null;
 var DialogFocusSourceItem = null;
+var DialogFocusItemOriginalColor = null;
+var DialogFocusItemColorizationRedrawTimer = null;
 var DialogMenuButton = [];
 var DialogItemToLock = null;
 var DialogAllowBlush = false;
@@ -159,6 +161,7 @@ function DialogLeaveItemMenu() {
 	DialogInventory = null;
 	DialogProgress = -1;
 	DialogColor = null;
+	DialogFocusItemOriginalColor = null;
 	DialogMenuButton = [];
 	DialogItemPermissionMode = false;
 	ElementRemove("InputColor");
@@ -516,6 +519,14 @@ function DialogMenuButtonClick() {
 				ElementCreateInput("InputColor", "text", (DialogColorSelect != null) ? DialogColorSelect.toString() : "");
 				DialogColor = "";
 				DialogMenuButtonBuild(C);
+				// Rememeber the original color when open color picker
+				if (Item != null) {
+					DialogFocusItemOriginalColor = Item.Color;
+					// Populate color picker initial color with current one
+					ElementValue("InputColor", Item.Color || "");
+				} else {
+					DialogFocusItemOriginalColor = null;
+				}
 				return;
 			}
 
@@ -525,6 +536,13 @@ function DialogMenuButtonClick() {
 				DialogColorSelect = ElementValue("InputColor");
 				ElementRemove("InputColor");
 				DialogMenuButtonBuild(C);
+				// Apply item color change
+				if (Item != null && DialogFocusItemOriginalColor != Item.Color) {
+					// FocusItem color changed, sync to server
+					if (C.ID == 0) ServerPlayerAppearanceSync();
+					ChatRoomPublishAction(C, { ...Item, Color: DialogFocusItemOriginalColor }, Item, false);
+					ChatRoomCharacterUpdate(C);
+				}
 				return;
 			}
 
@@ -534,6 +552,11 @@ function DialogMenuButtonClick() {
 				DialogColorSelect = null;
 				ElementRemove("InputColor");
 				DialogMenuButtonBuild(C);
+				// Recall the original color when open color picker
+				if (Item != null) {
+					Item.Color = DialogFocusItemOriginalColor;
+					CharacterAppearanceBuildCanvas(C);
+				}
 				return;
 			}
 
@@ -705,10 +728,6 @@ function DialogClick() {
 			// If the user wants to click on one of icons in the item menu
 			if ((MouseX >= 1000) && (MouseX < 2000) && (MouseY >= 15) && (MouseY <= 105)) DialogMenuButtonClick();
 
-			// In color picker mode, we can pick a color from the color image
-			if ((MouseX >= 1300) && (MouseX < 1975) && (MouseY >= 145) && (MouseY < 975) && (DialogColor != null))
-				ElementValue("InputColor", DrawRGBToHex(MainCanvas.getImageData(MouseX, MouseY, 1, 1).data));
-
 			// If the user clicks on one of the items
 			if ((MouseX >= 1000) && (MouseX <= 1975) && (MouseY >= 125) && (MouseY <= 1000) && ((DialogItemPermissionMode && (Player.FocusGroup != null)) || (Player.CanInteract() && !InventoryGroupIsBlocked((Player.FocusGroup != null) ? Player : CurrentCharacter))) && (DialogProgress < 0) && (DialogColor == null)) {
 
@@ -834,6 +853,28 @@ function DialogExtendItem(Item, SourceItem) {
 	CommonDynamicFunction("Inventory" + Item.Asset.Group.Name + Item.Asset.Name + "Load()");
 }
 
+function DialogChangeItemColor(C, Color) {
+	if (!Player.CanInteract()) return;
+
+	var Item = InventoryGet(C, C.FocusGroup.Name);
+	if (Item == null) return;
+
+	var Locked = InventoryItemHasEffect(Item, "Lock", true) && !Player.IsBlind() && (Item.Property != null) && (Item.Property.LockedBy != null) && (Item.Property.LockedBy != "");
+	if (Locked) {
+		// check lock type and ownership
+		var CanUnLock = (InventoryItemHasEffect(Item, "Lock", true) && DialogCanUnlock(C, Item) && InventoryAllow(C, Item.Asset.Prerequisite) && !InventoryGroupIsBlocked(C) && (Player.CanInteract() || ((C.ID == 0) && InventoryItemHasEffect(Item, "Block", true))));
+		if (!CanUnLock) return;
+	}
+
+	Item.Color = Color;
+
+	// Redraw character after 100ms, prevent unnecessary redraws, reduce performance impact
+	clearTimeout(DialogFocusItemColorizationRedrawTimer);
+	DialogFocusItemColorizationRedrawTimer = setTimeout(function () {
+		CharacterAppearanceBuildCanvas(C);
+	}, 100);
+}
+
 // Draw the item menu dialog
 function DialogDrawItemMenu(C) {
 
@@ -850,9 +891,10 @@ function DialogDrawItemMenu(C) {
 	// Draws the color picker
 	if (DialogColor != null) {
 		ElementPosition("InputColor", 1450, 65, 300);
-		if (CommonIsColor(ElementValue("InputColor"))) DrawRect(1290, 135, 695, 850, ElementValue("InputColor"));
-		DrawImage("Backgrounds/ColorPicker.png", 1300, 145);
+		ColorPickerDraw(1300, 145, 675, 830, document.getElementById("InputColor"), function (Color) { DialogChangeItemColor(C, Color) });
 		return;
+	} else {
+		ColorPickerHide();
 	}
 
 	// In item permission mode, the player can choose which item he allows other users to mess with.  Allowed items have a green background.  Disallowed have a red background.
