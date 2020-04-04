@@ -1,60 +1,69 @@
 "use strict";
+
+class CharacterClass {
+	ID = 0;
+	AssetFamily = "";
+	Name = "";
+	AccountName = "";
+	Owner = "";
+	Lover = "";
+	Money = 0;
+	Inventory = [];
+	Appearance = [];
+	Stage = "0";
+	CurrentDialog = "";
+	Dialog = [];
+	Reputation = [];
+	Skill = [];
+	Pose = [];
+	Effect = [];
+	FocusGroup = null;
+	Canvas = null;
+	CanvasBlink = null;
+	MustDraw = false;
+	BlinkFactor = Math.round(Math.random() * 10) + 10;
+	AllowItem = true;
+	BlockItems = [];
+	HeightModifier = 0;
+
+	constructor(id, assetFamily) {
+		this.ID = id;
+		this.AssetFamily = assetFamily;
+	}
+
+	CanTalk = function () { return ((this.Effect.indexOf("GagVeryLight") < 0) && (this.Effect.indexOf("GagLight") < 0) && (this.Effect.indexOf("GagEasy") < 0) && (this.Effect.indexOf("GagNormal") < 0) && (this.Effect.indexOf("GagMedium") < 0) && (this.Effect.indexOf("GagHeavy") < 0) && (this.Effect.indexOf("GagVeryHeavy") < 0) && (this.Effect.indexOf("GagTotal") < 0) && (this.Effect.indexOf("GagTotal2") < 0) && (this.Effect.indexOf("GagTotal3") < 0) && (this.Effect.indexOf("GagTotal4") < 0)) }
+	CanWalk = function () { return ((this.Effect.indexOf("Freeze") < 0) && (this.Effect.indexOf("Tethered") < 0) && ((this.Pose == null) || (this.Pose.indexOf("Kneel") < 0) || (this.Effect.indexOf("KneelFreeze") < 0))) }
+	CanKneel = function () { return ((this.Effect.indexOf("Freeze") < 0) && (this.Effect.indexOf("ForceKneel") < 0) && ((this.Pose == null) || ((this.Pose.indexOf("LegsClosed") < 0) && (this.Pose.indexOf("Supension") < 0) && (this.Pose.indexOf("Hogtied") < 0)))) }
+	CanInteract = function () { return (this.Effect.indexOf("Block") < 0) }
+	CanChange = function () { return ((this.Effect.indexOf("Freeze") < 0) && (this.Effect.indexOf("Block") < 0) && (this.Effect.indexOf("Prone") < 0) && !LogQuery("BlockChange", "Rule") && (!LogQuery("BlockChange", "OwnerRule") || (Player.Ownership == null) || (Player.Ownership.Stage != 1))) }
+	IsProne = function () { return (this.Effect.indexOf("Prone") >= 0) }
+	IsRestrained = function () { return ((this.Effect.indexOf("Freeze") >= 0) || (this.Effect.indexOf("Block") >= 0) || (this.Effect.indexOf("Prone") >= 0)) }
+	IsBlind = function () { return ((this.Effect.indexOf("BlindLight") >= 0) || (this.Effect.indexOf("BlindNormal") >= 0) || (this.Effect.indexOf("BlindHeavy") >= 0)) }
+	IsEnclose = function () { return (this.Effect.indexOf("Enclose") >= 0) }
+	IsMounted = function () { return (this.Effect.indexOf("Mounted") >= 0) }
+	IsChaste = function () { return ((this.Effect.indexOf("Chaste") >= 0) || (this.Effect.indexOf("BreastChaste") >= 0)) }
+	IsVulvaChaste = function () { return (this.Effect.indexOf("Chaste") >= 0) }
+	IsBreastChaste = function () { return (this.Effect.indexOf("BreastChaste") >= 0) }
+	IsEgged = function () { return (this.Effect.indexOf("Egged") >= 0) }
+	IsOwned = function () { return ((this.Owner != null) && (this.Owner.trim() != "")) }
+	IsOwnedByPlayer = function () { return (((((this.Owner != null) && (this.Owner.trim() == Player.Name)) || (NPCEventGet(this, "EndDomTrial") > 0)) && (this.Ownership == null)) || ((this.Ownership != null) && (this.Ownership.MemberNumber != null) && (this.Ownership.MemberNumber == Player.MemberNumber))) }
+	IsOwner = function () { return ((NPCEventGet(this, "EndSubTrial") > 0) || (this.Name == Player.Owner.replace("NPC-", ""))) }
+	IsLoved = function () { return ((this.Lover != null) && (this.Lover.trim() != "")) }
+	IsLoverOfPlayer = function () { return (((((this.Lover != null) && (this.Lover.trim() == Player.Name)) || (NPCEventGet(this, "Girlfriend") > 0)) && (this.Lovership == null)) || ((this.Lovership != null) && (this.Lovership.MemberNumber != null) && (this.Lovership.MemberNumber == Player.MemberNumber))) }
+	IsLover = function () { return ((NPCEventGet(this, "Girlfriend") > 0) || (this.Name == Player.Lover.replace("NPC-", ""))) }
+	IsKneeling = function () { return ((this.Pose != null) && (this.Pose.indexOf("Kneel") >= 0)) }
+	IsNaked = function () { return CharacterIsNaked(this); }
+	IsDeaf = function () { return ((this.Effect.indexOf("DeafLight") >= 0) || (this.Effect.indexOf("DeafNormal") >= 0) || (this.Effect.indexOf("DeafHeavy") >= 0)) }
+	HasNoItem = function () { return CharacterHasNoItem(this); }
+}
+
 var Character = [];
 
 // Loads a character in the buffer
 function CharacterReset(CharacterID, CharacterAssetFamily) {
 
 	// Prepares the character sheet
-	var NewCharacter = {
-		ID: CharacterID,
-		Name: "",
-		AssetFamily: CharacterAssetFamily,
-		AccountName: "",
-		Owner: "",
-		Lover: "",
-		Money: 0,
-		Inventory: [],
-		Appearance: [],
-		Stage: "0",
-		CurrentDialog: "",
-		Dialog: [],
-		Reputation: [],
-		Skill: [],
-		Pose: [],
-		Effect: [],
-		FocusGroup: null,
-		Canvas: null,
-		CanvasBlink: null,
-		MustDraw: false,
-		BlinkFactor: Math.round(Math.random() * 10) + 10,
-		AllowItem: true,
-		BlockItems: [],
-		HeightModifier: 0,
-		CanTalk: function () { return ((this.Effect.indexOf("GagVeryLight") < 0) && (this.Effect.indexOf("GagLight") < 0) && (this.Effect.indexOf("GagEasy") < 0) && (this.Effect.indexOf("GagNormal") < 0) && (this.Effect.indexOf("GagMedium") < 0) && (this.Effect.indexOf("GagHeavy") < 0) && (this.Effect.indexOf("GagVeryHeavy") < 0) && (this.Effect.indexOf("GagTotal") < 0) && (this.Effect.indexOf("GagTotal2") < 0) && (this.Effect.indexOf("GagTotal3") < 0) && (this.Effect.indexOf("GagTotal4") < 0)) },
-		CanWalk: function () { return ((this.Effect.indexOf("Freeze") < 0) && (this.Effect.indexOf("Tethered") < 0) && ((this.Pose == null) || (this.Pose.indexOf("Kneel") < 0) || (this.Effect.indexOf("KneelFreeze") < 0))) },
-		CanKneel: function () { return ((this.Effect.indexOf("Freeze") < 0) && (this.Effect.indexOf("ForceKneel") < 0) && ((this.Pose == null) || ((this.Pose.indexOf("LegsClosed") < 0) && (this.Pose.indexOf("Supension") < 0) && (this.Pose.indexOf("Hogtied") < 0)))) },
-		CanInteract: function () { return (this.Effect.indexOf("Block") < 0) },
-		CanChange: function () { return ((this.Effect.indexOf("Freeze") < 0) && (this.Effect.indexOf("Block") < 0) && (this.Effect.indexOf("Prone") < 0) && !LogQuery("BlockChange", "Rule") && (!LogQuery("BlockChange", "OwnerRule") || (Player.Ownership == null) || (Player.Ownership.Stage != 1))) },
-		IsProne: function () { return (this.Effect.indexOf("Prone") >= 0) },
-		IsRestrained: function () { return ((this.Effect.indexOf("Freeze") >= 0) || (this.Effect.indexOf("Block") >= 0) || (this.Effect.indexOf("Prone") >= 0)) },
-		IsBlind: function () { return ((this.Effect.indexOf("BlindLight") >= 0) || (this.Effect.indexOf("BlindNormal") >= 0) || (this.Effect.indexOf("BlindHeavy") >= 0)) },
-		IsEnclose: function () { return (this.Effect.indexOf("Enclose") >= 0) },
-		IsMounted: function () { return (this.Effect.indexOf("Mounted") >= 0) },
-		IsChaste: function () { return ((this.Effect.indexOf("Chaste") >= 0) || (this.Effect.indexOf("BreastChaste") >= 0)) },
-		IsVulvaChaste: function () { return (this.Effect.indexOf("Chaste") >= 0) },
-		IsBreastChaste: function () { return (this.Effect.indexOf("BreastChaste") >= 0) },
-		IsEgged: function () { return (this.Effect.indexOf("Egged") >= 0) },
-		IsOwned: function () { return ((this.Owner != null) && (this.Owner.trim() != "")) },
-		IsOwnedByPlayer: function () { return (((((this.Owner != null) && (this.Owner.trim() == Player.Name)) || (NPCEventGet(this, "EndDomTrial") > 0)) && (this.Ownership == null)) || ((this.Ownership != null) && (this.Ownership.MemberNumber != null) && (this.Ownership.MemberNumber == Player.MemberNumber))) },
-		IsOwner: function () { return ((NPCEventGet(this, "EndSubTrial") > 0) || (this.Name == Player.Owner.replace("NPC-", ""))) },
-		IsLoved: function () { return ((this.Lover != null) && (this.Lover.trim() != "")) },
-		IsLoverOfPlayer: function () { return (((((this.Lover != null) && (this.Lover.trim() == Player.Name)) || (NPCEventGet(this, "Girlfriend") > 0)) && (this.Lovership == null)) || ((this.Lovership != null) && (this.Lovership.MemberNumber != null) && (this.Lovership.MemberNumber == Player.MemberNumber))) },
-		IsLover: function () { return ((NPCEventGet(this, "Girlfriend") > 0) || (this.Name == Player.Lover.replace("NPC-", ""))) },
-		IsKneeling: function () { return ((this.Pose != null) && (this.Pose.indexOf("Kneel") >= 0)) },
-		IsNaked: function () { return CharacterIsNaked(this); },
-		IsDeaf: function () { return ((this.Effect.indexOf("DeafLight") >= 0) || (this.Effect.indexOf("DeafNormal") >= 0) || (this.Effect.indexOf("DeafHeavy") >= 0)) },
-		HasNoItem: function () { return CharacterHasNoItem(this); }
-	}
+	var NewCharacter = new CharacterClass(CharacterID, CharacterAssetFamily)
 
 	// If the character doesn't exist, we create it
 	if (CharacterID >= Character.length)
